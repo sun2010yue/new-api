@@ -103,6 +103,10 @@ user.telegram_id_empty: "Telegram id 为空！"
 user.telegram_not_bound: "该 Telegram 账户未绑定"
 user.linux_do_id_empty: "Linux DO id 为空！"
 user.quota_change_zero: "额度变更量不能为0"
+user.whitelist_limit_exceeded: "白名单最多允许100条"
+user.ip_not_allowed: "登录IP不在允许的白名单中"
+user.whitelist_invalid_entry: "白名单中存在无效的IP或CIDR条目"
+user.whitelist_required: "启用登录白名单时，白名单不能为空"
 
 # Quota messages
 quota.negative: "额度不能为负数！"
@@ -209,6 +213,7 @@ setting.gotify_url_empty: "Gotify服务器地址不能为空"
 setting.gotify_token_empty: "Gotify令牌不能为空"
 setting.gotify_url_invalid: "无效的Gotify服务器地址"
 setting.url_must_http: "URL必须以http://或https://开头"
+setting.ip_format_invalid: "无效的IP或CIDR格式"
 setting.saved: "设置已更新"
 
 # Deployment messages (io.net)

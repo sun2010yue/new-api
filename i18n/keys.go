@@ -114,6 +114,10 @@ const (
 	MsgUserTelegramNotBound          = "user.telegram_not_bound"
 	MsgUserLinuxDOIdEmpty            = "user.linux_do_id_empty"
 	MsgUserQuotaChangeZero           = "user.quota_change_zero"
+	MsgUserWhitelistLimitExceeded    = "user.whitelist_limit_exceeded"
+	MsgUserIpNotAllowed              = "user.ip_not_allowed"
+	MsgUserWhitelistInvalidEntry     = "user.whitelist_invalid_entry"
+	MsgUserWhitelistRequired         = "user.whitelist_required"
 )
 
 // Quota related messages
@@ -246,6 +250,7 @@ const (
 	MsgSettingGotifyTokenEmpty = "setting.gotify_token_empty"
 	MsgSettingGotifyUrlInvalid = "setting.gotify_url_invalid"
 	MsgSettingUrlMustHttp      = "setting.url_must_http"
+	MsgSettingIpFormatInvalid  = "setting.ip_format_invalid"
 	MsgSettingSaved            = "setting.saved"
 )
 

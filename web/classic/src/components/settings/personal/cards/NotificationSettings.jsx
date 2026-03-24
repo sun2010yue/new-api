@@ -794,6 +794,46 @@ const NotificationSettings = ({
                     '开启后，仅"消费"和"错误"日志将记录您的客户端IP地址',
                   )}
                 />
+
+                <Form.Switch
+                  field='loginIpWhitelistEnabled'
+                  label={t('启用登录IP白名单')}
+                  checkedText={t('开')}
+                  uncheckedText={t('关')}
+                  onChange={(value) => handleFormChange('loginIpWhitelistEnabled', value)}
+                  extraText={t(
+                    '开启后，仅允许白名单中的IP或IP段登录您的账户',
+                  )}
+                />
+
+                {notificationSettings.loginIpWhitelistEnabled && (
+                  <Form.TextArea
+                    field='loginIpWhitelist'
+                    label={t('登录IP白名单')}
+                    placeholder={t('每行一个IP或CIDR，例如：192.168.1.1\n10.0.0.0/8')}
+                    onChange={(value) => handleFormChange('loginIpWhitelist', value.split('\n').filter(ip => ip.trim() !== ''))}
+                    extraText={t('最多支持100条，每行一个IP地址或CIDR网段')}
+                    rules={[
+                      {
+                        validator: (rule, value) => {
+                          if (!Array.isArray(value)) return Promise.resolve();
+                          if (value.length > 100) {
+                            return Promise.reject(t('白名单最多允许100条'));
+                          }
+                          for (const ip of value) {
+                            if (ip.trim() === '') continue;
+                            // 简单的IP/CIDR验证
+                            const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\/(?:[0-9]|[1-2][0-9]|3[0-2]))?$/;
+                            if (!ipRegex.test(ip.trim())) {
+                              return Promise.reject(t('无效的IP或CIDR格式'));
+                            }
+                          }
+                          return Promise.resolve();
+                        },
+                      },
+                    ]}
+                  />
+                )}
               </div>
             </TabPane>
 

@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"net"
 	"net/http"
 	"net/url"
 	"strconv"
@@ -62,6 +63,25 @@ func Login(c *gin.Context) {
 			common.ApiErrorI18n(c, i18n.MsgUserUsernameOrPasswordError)
 		}
 		return
+	}
+
+	// 检查登录IP白名单
+	userSetting := user.GetSetting()
+	if userSetting.LoginIpWhitelistEnabled {
+		clientIP := c.ClientIP()
+		if clientIP == "" {
+			common.ApiErrorI18n(c, i18n.MsgUserIpNotAllowed)
+			return
+		}
+		ip := net.ParseIP(clientIP)
+		if ip == nil {
+			common.ApiErrorI18n(c, i18n.MsgUserIpNotAllowed)
+			return
+		}
+		if !common.IsIpInCIDRList(ip, userSetting.LoginIpWhitelist) {
+			common.ApiErrorI18n(c, i18n.MsgUserIpNotAllowed)
+			return
+		}
 	}
 
 	// 检查是否启用2FA
@@ -1123,6 +1143,8 @@ type UpdateUserSettingRequest struct {
 	UpstreamModelUpdateNotifyEnabled *bool   `json:"upstream_model_update_notify_enabled,omitempty"`
 	AcceptUnsetModelRatioModel       bool    `json:"accept_unset_model_ratio_model"`
 	RecordIpLog                      bool    `json:"record_ip_log"`
+	LoginIpWhitelistEnabled          bool    `json:"login_ip_whitelist_enabled"`
+	LoginIpWhitelist                 []string `json:"login_ip_whitelist,omitempty"`
 }
 
 func UpdateUserSetting(c *gin.Context) {
@@ -1206,6 +1228,29 @@ func UpdateUserSetting(c *gin.Context) {
 		}
 	}
 
+	// 验证登录IP白名单
+	if req.LoginIpWhitelistEnabled {
+		if len(req.LoginIpWhitelist) == 0 {
+			common.ApiErrorI18n(c, i18n.MsgUserWhitelistRequired)
+			return
+		}
+		if len(req.LoginIpWhitelist) > 100 {
+			common.ApiErrorI18n(c, i18n.MsgUserWhitelistLimitExceeded)
+			return
+		}
+		for _, entry := range req.LoginIpWhitelist {
+			if strings.TrimSpace(entry) == "" {
+				continue
+			}
+			if _, _, err := net.ParseCIDR(entry); err != nil {
+				if net.ParseIP(entry) == nil {
+					common.ApiErrorI18n(c, i18n.MsgUserWhitelistInvalidEntry)
+					return
+				}
+			}
+		}
+	}
+
 	userId := c.GetInt("id")
 	user, err := model.GetUserById(userId, true)
 	if err != nil {
@@ -1225,6 +1270,8 @@ func UpdateUserSetting(c *gin.Context) {
 		UpstreamModelUpdateNotifyEnabled: upstreamModelUpdateNotifyEnabled,
 		AcceptUnsetRatioModel:            req.AcceptUnsetModelRatioModel,
 		RecordIpLog:                      req.RecordIpLog,
+		LoginIpWhitelistEnabled:          req.LoginIpWhitelistEnabled,
+		LoginIpWhitelist:                 req.LoginIpWhitelist,
 	}
 
 	// 如果是webhook类型,添加webhook相关设置

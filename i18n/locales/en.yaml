@@ -102,7 +102,10 @@ user.telegram_id_empty: "Telegram ID is empty!"
 user.telegram_not_bound: "This Telegram account is not bound"
 user.linux_do_id_empty: "Linux DO ID is empty!"
 user.quota_change_zero: "Quota change amount cannot be zero"
-
+user.whitelist_limit_exceeded: "Whitelist cannot exceed 100 entries"
+user.ip_not_allowed: "Your login IP is not in the allowed whitelist"
+user.whitelist_invalid_entry: "Invalid IP/CIDR entry in whitelist"
+user.whitelist_required: "Whitelist cannot be empty when login whitelist is enabled"
 # Quota messages
 quota.negative: "Quota cannot be negative!"
 quota.exceed_max: "Quota value exceeds valid range"
@@ -208,6 +211,7 @@ setting.gotify_url_empty: "Gotify server URL cannot be empty"
 setting.gotify_token_empty: "Gotify token cannot be empty"
 setting.gotify_url_invalid: "Invalid Gotify server URL"
 setting.url_must_http: "URL must start with http:// or https://"
+setting.ip_format_invalid: "Invalid IP or CIDR format"
 setting.saved: "Settings updated"
 
 # Deployment messages (io.net)

@@ -198,6 +198,8 @@ const PersonalSetting = () => {
         acceptUnsetModelRatioModel:
           settings.accept_unset_model_ratio_model || false,
         recordIpLog: settings.record_ip_log || false,
+        loginIpWhitelistEnabled: settings.login_ip_whitelist_enabled || false,
+        loginIpWhitelist: settings.login_ip_whitelist || [],
       });
     }
   }, [userState?.user?.setting]);
@@ -528,6 +530,8 @@ const PersonalSetting = () => {
         accept_unset_model_ratio_model:
           notificationSettings.acceptUnsetModelRatioModel,
         record_ip_log: notificationSettings.recordIpLog,
+        login_ip_whitelist_enabled: notificationSettings.loginIpWhitelistEnabled,
+        login_ip_whitelist: notificationSettings.loginIpWhitelist,
       });
 
       if (res.data.success) {
