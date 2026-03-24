@@ -95,6 +95,9 @@ const PersonalSetting = () => {
     upstreamModelUpdateNotifyEnabled: false,
     acceptUnsetModelRatioModel: false,
     recordIpLog: false,
+    loginIpWhitelistEnabled: false,
+    loginIpWhitelist: [],
+    loginIpWhitelistRaw: '',
   });
 
   const {
@@ -200,6 +203,7 @@ const PersonalSetting = () => {
         recordIpLog: settings.record_ip_log || false,
         loginIpWhitelistEnabled: settings.login_ip_whitelist_enabled || false,
         loginIpWhitelist: settings.login_ip_whitelist || [],
+        loginIpWhitelistRaw: (settings.login_ip_whitelist || []).join('\n'),
       });
     }
   }, [userState?.user?.setting]);
@@ -531,7 +535,10 @@ const PersonalSetting = () => {
           notificationSettings.acceptUnsetModelRatioModel,
         record_ip_log: notificationSettings.recordIpLog,
         login_ip_whitelist_enabled: notificationSettings.loginIpWhitelistEnabled,
-        login_ip_whitelist: notificationSettings.loginIpWhitelist,
+        login_ip_whitelist: (notificationSettings.loginIpWhitelistRaw || '')
+          .split(/\r?\n/)
+          .map((ip) => ip.trim())
+          .filter((ip) => ip !== ''),
       });
 
       if (res.data.success) {

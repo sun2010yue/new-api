@@ -808,23 +808,25 @@ const NotificationSettings = ({
 
                 {notificationSettings.loginIpWhitelistEnabled && (
                   <Form.TextArea
-                    field='loginIpWhitelist'
+                    field='loginIpWhitelistRaw'
                     label={t('登录IP白名单')}
                     placeholder={t('每行一个IP或CIDR，例如：192.168.1.1\n10.0.0.0/8')}
-                    onChange={(value) => handleFormChange('loginIpWhitelist', value.split('\n').filter(ip => ip.trim() !== ''))}
+                    onChange={(value) => handleFormChange('loginIpWhitelistRaw', value)}
                     extraText={t('最多支持100条，每行一个IP地址或CIDR网段')}
                     rules={[
                       {
                         validator: (rule, value) => {
-                          if (!Array.isArray(value)) return Promise.resolve();
-                          if (value.length > 100) {
+                          const rawValue = value || '';
+                          const entries = rawValue
+                            .split(/\r?\n/)
+                            .map((ip) => ip.trim())
+                            .filter((ip) => ip !== '');
+                          if (entries.length > 100) {
                             return Promise.reject(t('白名单最多允许100条'));
                           }
-                          for (const ip of value) {
-                            if (ip.trim() === '') continue;
-                            // 简单的IP/CIDR验证
-                            const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\/(?:[0-9]|[1-2][0-9]|3[0-2]))?$/;
-                            if (!ipRegex.test(ip.trim())) {
+                          const ipRegex = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\/(?:[0-9]|[1-2][0-9]|3[0-2]))?$/;
+                          for (const ip of entries) {
+                            if (!ipRegex.test(ip)) {
                               return Promise.reject(t('无效的IP或CIDR格式'));
                             }
                           }
