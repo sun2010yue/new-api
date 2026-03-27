@@ -435,6 +435,7 @@ func GetSelf(c *gin.Context) {
 		"stripe_customer":   user.StripeCustomer,
 		"sidebar_modules":   userSetting.SidebarModules, // 正确提取sidebar_modules字段
 		"permissions":       permissions,                // 新增权限字段
+		"client_ip":         c.ClientIP(),               // 新增客户端IP字段
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -1251,6 +1252,17 @@ func UpdateUserSetting(c *gin.Context) {
 		}
 	}
 
+	// 如果启用登录IP白名单，确保当前IP在列表中
+	if req.LoginIpWhitelistEnabled {
+		clientIP := c.ClientIP()
+		if clientIP != "" {
+			ip := net.ParseIP(clientIP)
+			if ip != nil && !common.IsIpInCIDRList(ip, req.LoginIpWhitelist) {
+				req.LoginIpWhitelist = append(req.LoginIpWhitelist, clientIP)
+			}
+		}
+	}
+
 	userId := c.GetInt("id")
 	user, err := model.GetUserById(userId, true)
 	if err != nil {
@@ -1311,5 +1323,7 @@ func UpdateUserSetting(c *gin.Context) {
 		return
 	}
 
-	common.ApiSuccessI18n(c, i18n.MsgSettingSaved, nil)
+	// 返回当前客户端IP，用于前端显示
+	clientIP := c.ClientIP()
+	common.ApiSuccessI18n(c, i18n.MsgSettingSaved, gin.H{"clientIP": clientIP})
 }

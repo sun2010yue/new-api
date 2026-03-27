@@ -82,6 +82,7 @@ const PersonalSetting = () => {
     passkeyRequiredVerificationMethod,
     setPasskeyRequiredVerificationMethod,
   ] = useState(null);
+  const [clientIP, setClientIP] = useState('');
   const [notificationSettings, setNotificationSettings] = useState({
     warningType: 'email',
     warningThreshold: 100000,
@@ -371,6 +372,10 @@ const PersonalSetting = () => {
     if (success) {
       userDispatch({ type: 'login', payload: data });
       setUserData(data);
+      // 从响应中获取客户端IP
+      if (data && data.client_ip) {
+        setClientIP(data.client_ip);
+      }
       await loadPasskeyStatus();
     } else {
       showError(message);
@@ -544,6 +549,10 @@ const PersonalSetting = () => {
       if (res.data.success) {
         showSuccess(t('设置保存成功'));
         await getUserData();
+        // 从响应中获取客户端IP并更新状态
+        if (res.data.data && res.data.data.clientIP) {
+          setClientIP(res.data.data.clientIP);
+        }
       } else {
         showError(res.data.message);
       }
@@ -604,6 +613,7 @@ const PersonalSetting = () => {
               notificationSettings={notificationSettings}
               handleNotificationSettingChange={handleNotificationSettingChange}
               saveNotificationSettings={saveNotificationSettings}
+              clientIP={clientIP}
             />
           </div>
         </div>

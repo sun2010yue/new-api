@@ -31,6 +31,7 @@ import {
   Switch,
   Row,
   Col,
+  Banner,
 } from '@douyinfe/semi-ui';
 import { IconMail, IconKey, IconBell, IconLink } from '@douyinfe/semi-icons';
 import { ShieldCheck, Bell, DollarSign, Settings } from 'lucide-react';
@@ -54,6 +55,7 @@ const NotificationSettings = ({
   notificationSettings,
   handleNotificationSettingChange,
   saveNotificationSettings,
+  clientIP,
 }) => {
   const formApiRef = useRef(null);
   const [statusState] = useContext(StatusContext);
@@ -807,7 +809,18 @@ const NotificationSettings = ({
                 />
 
                 {notificationSettings.loginIpWhitelistEnabled && (
-                  <Form.TextArea
+                  <>
+                    <Banner
+                      type="info"
+                      description={
+                        <div>
+                          <p>{t('您的当前登录IP：')} <strong>{clientIP || t('加载中...')}</strong></p>
+                          <p>{t('开启IP白名单后，当前登录IP将自动加入白名单，且在当前登录下不可删除。')}</p>
+                        </div>
+                      }
+                      style={{ marginBottom: 16 }}
+                    />
+                    <Form.TextArea
                     field='loginIpWhitelistRaw'
                     label={t('登录IP白名单')}
                     placeholder={t('每行一个IP或CIDR，例如：192.168.1.1\n10.0.0.0/8')}
@@ -835,6 +848,7 @@ const NotificationSettings = ({
                       },
                     ]}
                   />
+                  </>
                 )}
               </div>
             </TabPane>

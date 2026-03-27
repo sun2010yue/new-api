@@ -3794,6 +3794,9 @@
     "见上方动态计费详情": "See dynamic pricing details above",
     "含时间条件": "Time rules",
     "含请求条件": "Request rules",
-    "（当前仅支持易支付接口，默认使用上方服务器地址作为回调地址！）": "(Currently only supports Epay interface, the default callback address is the server address above!)"
+    "（当前仅支持易支付接口，默认使用上方服务器地址作为回调地址！）": "(Currently only supports Epay interface, the default callback address is the server address above!)",
+    "当前登录IP提示": "Current Login IP Prompt",
+    "您的当前登录IP：": "Your current login IP: ",
+    "开启IP白名单后，当前登录IP将自动加入白名单，且在当前登录下不可删除。": "After enabling the IP whitelist, your current login IP will be automatically added to the whitelist and it cannot be deleted during the current login session."
   }
 }
