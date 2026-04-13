@@ -39,12 +39,14 @@ import InvitationCard from './InvitationCard';
 import TransferModal from './modals/TransferModal';
 import PaymentConfirmModal from './modals/PaymentConfirmModal';
 import TopupHistoryModal from './modals/TopupHistoryModal';
+import { useSidebar } from '../../hooks/common/useSidebar';
 
 const TopUp = () => {
   const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const [userState, userDispatch] = useContext(UserContext);
   const [statusState] = useContext(StatusContext);
+  const { adminConfig, userConfig } = useSidebar();
 
   const [redemptionCode, setRedemptionCode] = useState('');
   const [amount, setAmount] = useState(0.0);
@@ -55,6 +57,9 @@ const TopUp = () => {
   const [topUpLink, setTopUpLink] = useState('');
   const [enableOnlineTopUp, setEnableOnlineTopUp] = useState(
     statusState?.status?.enable_online_topup || false,
+  );
+  const [inviteRewardEnabled, setInviteRewardEnabled] = useState(
+    adminConfig?.personal?.invite ?? true,
   );
   const [priceRatio, setPriceRatio] = useState(statusState?.status?.price || 1);
 
@@ -764,10 +769,11 @@ const TopUp = () => {
       // setMinTopUp(minTopUpValue);
       // setTopUpCount(minTopUpValue);
       setPriceRatio(statusState.status.price || 1);
+      setInviteRewardEnabled(adminConfig?.personal?.invite ?? true);
 
       setStatusLoading(false);
     }
-  }, [statusState?.status]);
+  }, [statusState?.status, adminConfig]);
 
   const renderAmount = () => {
     return amount + ' ' + t('元');
@@ -940,8 +946,7 @@ const TopUp = () => {
 
       {/* 主布局区域 */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-        <RechargeCard
-          t={t}
+        <RechargeCard          t={t}
           enableOnlineTopUp={enableOnlineTopUp}
           enableStripeTopUp={enableStripeTopUp}
           enableCreemTopUp={enableCreemTopUp}
@@ -985,14 +990,16 @@ const TopUp = () => {
           allSubscriptions={allSubscriptions}
           reloadSubscriptionSelf={getSubscriptionSelf}
         />
-        <InvitationCard
-          t={t}
-          userState={userState}
-          renderQuota={renderQuota}
-          setOpenTransfer={setOpenTransfer}
-          affLink={affLink}
-          handleAffLinkClick={handleAffLinkClick}
-        />
+        {inviteRewardEnabled && (
+          <InvitationCard
+            t={t}
+            userState={userState}
+            renderQuota={renderQuota}
+            setOpenTransfer={setOpenTransfer}
+            affLink={affLink}
+            handleAffLinkClick={handleAffLinkClick}
+          />
+        )}
       </div>
     </div>
   );
