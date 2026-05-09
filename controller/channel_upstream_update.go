@@ -312,7 +312,11 @@ func fetchChannelUpstreamModelIDs(channel *model.Channel) ([]string, error) {
 			url = fmt.Sprintf("%s/v1/models", baseURL)
 		}
 	default:
-		url = fmt.Sprintf("%s/v1/models", baseURL)
+		apiVer := channel.GetOtherSettings().ApiVersion
+		if apiVer == "" {
+			apiVer = "v1"
+		}
+		url = fmt.Sprintf("%s/%s/models", baseURL, apiVer)
 	}
 
 	key, _, apiErr := channel.GetNextEnabledKey()

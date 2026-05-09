@@ -215,6 +215,7 @@ const EditChannelModal = (props) => {
     upstream_model_update_last_check_time: 0,
     upstream_model_update_last_detected_models: [],
     upstream_model_update_ignored_models: '',
+    api_version: '',
   };
   const [batch, setBatch] = useState(false);
   const [multiToSingle, setMultiToSingle] = useState(false);
@@ -927,6 +928,8 @@ const EditChannelModal = (props) => {
           )
             ? parsedSettings.upstream_model_update_ignored_models.join(',')
             : '';
+          // 读取 API 版本号
+          data.api_version = parsedSettings.api_version || '';
         } catch (error) {
           console.error('解析其他设置失败:', error);
           data.azure_responses_version = '';
@@ -1080,6 +1083,7 @@ const EditChannelModal = (props) => {
               base_url: inputs['base_url'],
               type: inputs['type'],
               key: inputs['key'],
+              api_version: inputs['api_version'] || '',
             },
             { skipErrorHandler: true },
           );
@@ -1826,6 +1830,13 @@ const EditChannelModal = (props) => {
       settings.upstream_model_update_last_check_time = 0;
     }
 
+    // 保存 API 版本号（为空或 v1 时不写入，保持默认）
+    if (localInputs.api_version && localInputs.api_version !== 'v1') {
+      settings.api_version = localInputs.api_version.trim();
+    } else {
+      delete settings.api_version;
+    }
+
     localInputs.settings = JSON.stringify(settings);
 
     // 清理不需要发送到后端的字段
@@ -1853,6 +1864,7 @@ const EditChannelModal = (props) => {
     delete localInputs.upstream_model_update_last_check_time;
     delete localInputs.upstream_model_update_last_detected_models;
     delete localInputs.upstream_model_update_ignored_models;
+    delete localInputs.api_version;
 
     let res;
     localInputs.auto_ban = localInputs.auto_ban ? 1 : 0;
@@ -3374,6 +3386,18 @@ const EditChannelModal = (props) => {
                               disabled={isIonetLocked}
                               extraText={t(
                                 '对于官方渠道，new-api已经内置地址，除非是第三方代理站点或者Azure的特殊接入地址，否则不需要填写',
+                              )}
+                            />
+                            <Form.Input
+                              field='api_version'
+                              label={t('API 版本号')}
+                              placeholder={t('默认 v1，如需 v3 等其他版本请在此填写')}
+                              onChange={(value) =>
+                                handleChannelOtherSettingsChange('api_version', value)
+                              }
+                              showClear
+                              extraText={t(
+                                '设置后，请求路径将使用此版本号（如 /v3/models），留空则使用默认 v1',
                               )}
                             />
                           </div>

@@ -969,9 +969,10 @@ func UpdateChannel(c *gin.Context) {
 
 func FetchModels(c *gin.Context) {
 	var req struct {
-		BaseURL string `json:"base_url"`
-		Type    int    `json:"type"`
-		Key     string `json:"key"`
+		BaseURL    string `json:"base_url"`
+		Type       int    `json:"type"`
+		Key        string `json:"key"`
+		ApiVersion string `json:"api_version"` // 可选，覆盖默认的 v1 版本前缀
 	}
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -1031,7 +1032,11 @@ func FetchModels(c *gin.Context) {
 	}
 
 	client := &http.Client{}
-	url := fmt.Sprintf("%s/v1/models", baseURL)
+	apiVer := req.ApiVersion
+	if apiVer == "" {
+		apiVer = "v1"
+	}
+	url := fmt.Sprintf("%s/%s/models", baseURL, apiVer)
 
 	request, err := http.NewRequest("GET", url, nil)
 	if err != nil {

@@ -24,6 +24,7 @@ const (
 )
 
 type ChannelOtherSettings struct {
+	ApiVersion                            string        `json:"api_version,omitempty"`             // API 版本号，如 "v1"（默认）、"v2" 等
 	AzureResponsesVersion                 string        `json:"azure_responses_version,omitempty"`
 	VertexKeyType                         VertexKeyType `json:"vertex_key_type,omitempty"` // "json" or "api_key"
 	OpenRouterEnterprise                  *bool         `json:"openrouter_enterprise,omitempty"`
@@ -48,4 +49,12 @@ func (s *ChannelOtherSettings) IsOpenRouterEnterprise() bool {
 		return false
 	}
 	return *s.OpenRouterEnterprise
+}
+
+// GetApiVersion 返回渠道配置的 API 版本前缀，默认 "v1"
+func (s *ChannelOtherSettings) GetApiVersion() string {
+	if s == nil || s.ApiVersion == "" {
+		return "v1"
+	}
+	return s.ApiVersion
 }
