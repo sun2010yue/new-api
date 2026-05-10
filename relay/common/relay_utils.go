@@ -28,7 +28,15 @@ func GetFullRequestURL(baseURL string, requestURL string, channelType int) strin
 	if strings.HasPrefix(baseURL, "https://gateway.ai.cloudflare.com") {
 		switch channelType {
 		case constant.ChannelTypeOpenAI:
-			fullRequestURL = fmt.Sprintf("%s%s", baseURL, strings.TrimPrefix(requestURL, "/v1"))
+			// 移除版本号前缀（支持 /v1, /v2, /v3 等）
+			trimmedURL := requestURL
+			if len(requestURL) > 3 && requestURL[0] == '/' && requestURL[1] == 'v' && requestURL[2] >= '0' && requestURL[2] <= '9' {
+				// 找到版本号后的第一个 /
+				if idx := strings.Index(requestURL[3:], "/"); idx != -1 {
+					trimmedURL = requestURL[3+idx:]
+				}
+			}
+			fullRequestURL = fmt.Sprintf("%s%s", baseURL, trimmedURL)
 		case constant.ChannelTypeAzure:
 			fullRequestURL = fmt.Sprintf("%s%s", baseURL, strings.TrimPrefix(requestURL, "/openai/deployments"))
 		}

@@ -56,35 +56,46 @@ const (
 
 func Path2RelayMode(path string) int {
 	relayMode := RelayModeUnknown
-	if strings.HasPrefix(path, "/v1/chat/completions") || strings.HasPrefix(path, "/pg/chat/completions") {
+
+	// 移除版本号前缀（支持 /v1/, /v2/, /v3/ 等）
+	// 匹配 /vN/ 格式，其中 N 是数字
+	pathWithoutVersion := path
+	if len(path) > 3 && path[0] == '/' && path[1] == 'v' && path[2] >= '0' && path[2] <= '9' {
+		// 找到版本号后的第一个 /
+		if idx := strings.Index(path[3:], "/"); idx != -1 {
+			pathWithoutVersion = path[3+idx:]
+		}
+	}
+
+	if strings.HasPrefix(path, "/v1/chat/completions") || strings.HasPrefix(path, "/pg/chat/completions") || strings.HasPrefix(pathWithoutVersion, "/chat/completions") {
 		relayMode = RelayModeChatCompletions
-	} else if strings.HasPrefix(path, "/v1/completions") {
+	} else if strings.HasPrefix(path, "/v1/completions") || strings.HasPrefix(pathWithoutVersion, "/completions") {
 		relayMode = RelayModeCompletions
-	} else if strings.HasPrefix(path, "/v1/embeddings") {
+	} else if strings.HasPrefix(path, "/v1/embeddings") || strings.HasPrefix(pathWithoutVersion, "/embeddings") {
 		relayMode = RelayModeEmbeddings
 	} else if strings.HasSuffix(path, "embeddings") {
 		relayMode = RelayModeEmbeddings
-	} else if strings.HasPrefix(path, "/v1/moderations") {
+	} else if strings.HasPrefix(path, "/v1/moderations") || strings.HasPrefix(pathWithoutVersion, "/moderations") {
 		relayMode = RelayModeModerations
-	} else if strings.HasPrefix(path, "/v1/images/generations") {
+	} else if strings.HasPrefix(path, "/v1/images/generations") || strings.HasPrefix(pathWithoutVersion, "/images/generations") {
 		relayMode = RelayModeImagesGenerations
-	} else if strings.HasPrefix(path, "/v1/images/edits") {
+	} else if strings.HasPrefix(path, "/v1/images/edits") || strings.HasPrefix(pathWithoutVersion, "/images/edits") {
 		relayMode = RelayModeImagesEdits
-	} else if strings.HasPrefix(path, "/v1/edits") {
+	} else if strings.HasPrefix(path, "/v1/edits") || strings.HasPrefix(pathWithoutVersion, "/edits") {
 		relayMode = RelayModeEdits
-	} else if strings.HasPrefix(path, "/v1/responses/compact") {
+	} else if strings.HasPrefix(path, "/v1/responses/compact") || strings.HasPrefix(pathWithoutVersion, "/responses/compact") {
 		relayMode = RelayModeResponsesCompact
-	} else if strings.HasPrefix(path, "/v1/responses") {
+	} else if strings.HasPrefix(path, "/v1/responses") || strings.HasPrefix(pathWithoutVersion, "/responses") {
 		relayMode = RelayModeResponses
-	} else if strings.HasPrefix(path, "/v1/audio/speech") {
+	} else if strings.HasPrefix(path, "/v1/audio/speech") || strings.HasPrefix(pathWithoutVersion, "/audio/speech") {
 		relayMode = RelayModeAudioSpeech
-	} else if strings.HasPrefix(path, "/v1/audio/transcriptions") {
+	} else if strings.HasPrefix(path, "/v1/audio/transcriptions") || strings.HasPrefix(pathWithoutVersion, "/audio/transcriptions") {
 		relayMode = RelayModeAudioTranscription
-	} else if strings.HasPrefix(path, "/v1/audio/translations") {
+	} else if strings.HasPrefix(path, "/v1/audio/translations") || strings.HasPrefix(pathWithoutVersion, "/audio/translations") {
 		relayMode = RelayModeAudioTranslation
-	} else if strings.HasPrefix(path, "/v1/rerank") {
+	} else if strings.HasPrefix(path, "/v1/rerank") || strings.HasPrefix(pathWithoutVersion, "/rerank") {
 		relayMode = RelayModeRerank
-	} else if strings.HasPrefix(path, "/v1/realtime") {
+	} else if strings.HasPrefix(path, "/v1/realtime") || strings.HasPrefix(pathWithoutVersion, "/realtime") {
 		relayMode = RelayModeRealtime
 	} else if strings.HasPrefix(path, "/v1beta/models") || strings.HasPrefix(path, "/v1/models") {
 		relayMode = RelayModeGemini

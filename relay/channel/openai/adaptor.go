@@ -115,7 +115,15 @@ func (a *Adaptor) GetRequestURL(info *relaycommon.RelayInfo) (string, error) {
 		// https://learn.microsoft.com/en-us/azure/cognitive-services/openai/chatgpt-quickstart?pivots=rest-api&tabs=command-line#rest-api
 		requestURL := strings.Split(info.RequestURLPath, "?")[0]
 		requestURL = fmt.Sprintf("%s?api-version=%s", requestURL, apiVersion)
-		task := strings.TrimPrefix(requestURL, "/v1/")
+
+		// 移除版本号前缀（支持 /v1/, /v2/, /v3/ 等）
+		task := requestURL
+		if len(requestURL) > 3 && requestURL[0] == '/' && requestURL[1] == 'v' && requestURL[2] >= '0' && requestURL[2] <= '9' {
+			// 找到版本号后的第一个 /
+			if idx := strings.Index(requestURL[3:], "/"); idx != -1 {
+				task = requestURL[3+idx:]
+			}
+		}
 
 		if info.RelayFormat == types.RelayFormatClaude {
 			task = strings.TrimPrefix(task, "messages")

@@ -107,7 +107,9 @@ func chatCompletionsViaResponses(c *gin.Context, info *relaycommon.RelayInfo, ad
 	}()
 
 	info.RelayMode = relayconstant.RelayModeResponses
-	info.RequestURLPath = "/v1/responses"
+	// 使用渠道配置的 API 版本号
+	apiVersion := info.ChannelOtherSettings.GetApiVersion()
+	info.RequestURLPath = "/" + apiVersion + "/responses"
 
 	convertedRequest, err := adaptor.ConvertOpenAIResponsesRequest(c, info, *responsesReq)
 	if err != nil {

@@ -94,18 +94,25 @@ func testChannel(channel *model.Channel, testModel string, endpointType string, 
 
 	endpointType = normalizeChannelTestEndpoint(channel, testModel, endpointType)
 
-	requestPath := "/v1/chat/completions"
+	// 获取渠道配置的 API 版本号，默认 v1
+	otherSettings := channel.GetOtherSettings()
+	apiVersion := otherSettings.GetApiVersion()
+	requestPath := fmt.Sprintf("/%s/chat/completions", apiVersion)
 
 	// 如果指定了端点类型，使用指定的端点类型
 	if endpointType != "" {
 		if endpointInfo, ok := common.GetDefaultEndpointInfo(constant.EndpointType(endpointType)); ok {
 			requestPath = endpointInfo.Path
+			// 替换路径中的版本号
+			if strings.HasPrefix(requestPath, "/v1/") {
+				requestPath = fmt.Sprintf("/%s/%s", apiVersion, strings.TrimPrefix(requestPath, "/v1/"))
+			}
 		}
 	} else {
 		// 如果没有指定端点类型，使用原有的自动检测逻辑
 
 		if strings.Contains(strings.ToLower(testModel), "rerank") {
-			requestPath = "/v1/rerank"
+			requestPath = fmt.Sprintf("/%s/rerank", apiVersion)
 		}
 
 		// 先判断是否为 Embedding 模型
@@ -114,22 +121,22 @@ func testChannel(channel *model.Channel, testModel string, endpointType string, 
 			strings.Contains(testModel, "bge-") || // bge 系列模型
 			strings.Contains(testModel, "embed") ||
 			channel.Type == constant.ChannelTypeMokaAI { // 其他 embedding 模型
-			requestPath = "/v1/embeddings" // 修改请求路径
+			requestPath = fmt.Sprintf("/%s/embeddings", apiVersion) // 修改请求路径
 		}
 
 		// VolcEngine 图像生成模型
 		if channel.Type == constant.ChannelTypeVolcEngine && strings.Contains(testModel, "seedream") {
-			requestPath = "/v1/images/generations"
+			requestPath = fmt.Sprintf("/%s/images/generations", apiVersion)
 		}
 
 		// responses-only models
 		if strings.Contains(strings.ToLower(testModel), "codex") {
-			requestPath = "/v1/responses"
+			requestPath = fmt.Sprintf("/%s/responses", apiVersion)
 		}
 
 		// responses compaction models (must use /v1/responses/compact)
 		if strings.HasSuffix(testModel, ratio_setting.CompactModelSuffix) {
-			requestPath = "/v1/responses/compact"
+			requestPath = fmt.Sprintf("/%s/responses/compact", apiVersion)
 		}
 	}
 	if strings.HasPrefix(requestPath, "/v1/responses/compact") {
