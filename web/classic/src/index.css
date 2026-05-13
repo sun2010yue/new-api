@@ -984,6 +984,143 @@ html.dark .with-pastel-balls::before {
 }
 
 /* ==================== 自定义圆角样式 ==================== */
+/* ==================== 首页营销页面样式 ==================== */
+
+/* Hero gradient background */
+.home-hero-gradient {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+/* Hero gradient for smaller elements */
+.home-hero-accent-gradient {
+  background: linear-gradient(135deg, #1e40af 0%, #7c3aed 50%, #db2777 100%);
+}
+
+/* Gradient text for stat numbers */
+.home-stat-number {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Gradient text for hero heading highlight */
+.home-hero-highlight {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Floating animation */
+@keyframes home-floating {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
+}
+
+.home-floating {
+  animation: home-floating 3s ease-in-out infinite;
+}
+
+/* Pulse glow animation for CTA button */
+@keyframes home-pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+  50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
+}
+
+.home-pulse-glow {
+  animation: home-pulse-glow 2s ease-in-out infinite;
+}
+
+/* Infinite scrolling for model logos */
+@keyframes home-model-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.home-model-scroll-anim {
+  animation: home-model-scroll 30s linear infinite;
+}
+
+/* Feature card hover effect */
+.home-card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.home-card-hover:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Pricing card original price strikethrough */
+.home-price-strike {
+  text-decoration: line-through;
+  color: #94a3b8;
+}
+
+/*
+ * Tailwind color utility fixes.
+ * The project's Tailwind config replaces the default color palette with semi-color-* CSS variables,
+ * so standard utility classes like text-white, text-slate-*, bg-white etc. won't be generated.
+ * These home-* classes fill the gap for the marketing landing page.
+ */
+.home-text-white { color: #fff; }
+.home-text-slate-200 { color: #e2e8f0; }
+.home-text-slate-300 { color: #cbd5e1; }
+.home-text-slate-400 { color: #94a3b8; }
+.home-bg-white { background-color: #fff; }
+.home-text-yellow-400 { color: #facc15; }
+.home-bg-white-10 { background-color: rgba(255, 255, 255, 0.1); }
+.home-border-white-20 { border-color: rgba(255, 255, 255, 0.2); }
+.home-bg-green-400 { background-color: #4ade80; }
+.home-text-slate-900 { color: #0f172a; }
+
+/* Hover variants - needed because Tailwind's hover: prefix only works with its own utilities */
+.home-text-white-hover:hover { color: #fff; }
+.home-hover-bg-slate-100:hover { background-color: #f1f5f9; }
+.home-hover-bg-white-20:hover { background-color: rgba(255, 255, 255, 0.2); }
+
+/* Background blur balls for hero */
+.home-blur-ball {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(120px);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Dark gradient section background */
+.home-dark-gradient {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+}
+
+/* Card glass effect */
+.home-glass-card {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* Nav blur backdrop */
+.home-nav-backdrop {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+html.dark .home-nav-backdrop {
+  background: rgba(30, 30, 30, 0.8);
+}
+
+/* Pricing card gradient backgrounds */
+.home-pricing-card {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+html.dark .home-pricing-card {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+}
+
 .semi-radio,
 .semi-tagInput,
 .semi-input-textarea-wrapper,
