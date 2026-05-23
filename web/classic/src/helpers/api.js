@@ -378,6 +378,11 @@ export async function loadChannelModels() {
   localStorage.setItem('channel_models', JSON.stringify(data));
 }
 
+export async function getChannels() {
+  const res = await API.get('/api/channel/');
+  return res.data;
+}
+
 export function getChannelModels(type) {
   if (channelModels !== undefined && type in channelModels) {
     if (!channelModels[type]) {

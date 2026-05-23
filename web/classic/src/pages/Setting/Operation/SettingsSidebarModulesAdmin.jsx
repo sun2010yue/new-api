@@ -62,6 +62,9 @@ export default function SettingsSidebarModulesAdmin(props) {
     admin: {
       enabled: true,
       channel: true,
+      channelCost: true,
+      multiChannelPricing: true,
+      pricingAlert: true,
       models: true,
       deployment: true,
       redemption: true,
@@ -124,6 +127,9 @@ export default function SettingsSidebarModulesAdmin(props) {
       admin: {
         enabled: true,
         channel: true,
+        channelCost: true,
+        multiChannelPricing: true,
+        pricingAlert: true,
         models: true,
         deployment: true,
         redemption: true,
@@ -193,6 +199,9 @@ export default function SettingsSidebarModulesAdmin(props) {
           admin: {
             enabled: true,
             channel: true,
+            channelCost: true,
+            multiChannelPricing: true,
+            pricingAlert: true,
             models: true,
             deployment: true,
             redemption: true,
@@ -261,6 +270,9 @@ export default function SettingsSidebarModulesAdmin(props) {
       description: t('系统管理功能'),
       modules: [
         { key: 'channel', title: t('渠道管理'), description: t('API渠道配置') },
+        { key: 'channelCost', title: t('渠道成本'), description: t('渠道成本管理') },
+        { key: 'multiChannelPricing', title: t('多渠道定价'), description: t('多渠道定价管理') },
+        { key: 'pricingAlert', title: t('价格告警'), description: t('价格异常告警') },
         { key: 'models', title: t('模型管理'), description: t('AI模型配置') },
         {
           key: 'deployment',

@@ -30,6 +30,12 @@ type Model struct {
 	Endpoints    string         `json:"endpoints,omitempty" gorm:"type:text"`
 	Status       int            `json:"status" gorm:"default:1"`
 	SyncOfficial int            `json:"sync_official" gorm:"default:1"`
+
+	// Official reference prices (USD per 1M tokens), populated from upstream sync
+	OfficialPriceInput  float64 `json:"official_price_input" gorm:"type:decimal;default:0"`
+	OfficialPriceOutput float64 `json:"official_price_output" gorm:"type:decimal;default:0"`
+	OfficialPriceCache  float64 `json:"official_price_cache" gorm:"type:decimal;default:0"`
+
 	CreatedTime  int64          `json:"created_time" gorm:"bigint"`
 	UpdatedTime  int64          `json:"updated_time" gorm:"bigint"`
 	DeletedAt    gorm.DeletedAt `json:"-" gorm:"index;uniqueIndex:uk_model_name_delete_at,priority:2"`
@@ -77,7 +83,7 @@ func (mi *Model) Update() error {
 	mi.UpdatedTime = common.GetTimestamp()
 	// 使用 Select 强制更新所有字段，包括零值
 	return DB.Model(&Model{}).Where("id = ?", mi.Id).
-		Select("model_name", "description", "icon", "tags", "vendor_id", "endpoints", "status", "sync_official", "name_rule", "updated_time").
+		Select("model_name", "description", "icon", "tags", "vendor_id", "endpoints", "status", "sync_official", "name_rule", "official_price_input", "official_price_output", "official_price_cache", "updated_time").
 		Updates(mi).Error
 }
 

@@ -18,6 +18,7 @@ class ErrorBoundary extends React.Component {
 
   componentDidCatch(error, errorInfo) {
     console.error('[ErrorBoundary]', error, errorInfo);
+    console.error('[ErrorBoundary] Component stack:', errorInfo?.componentStack);
   }
 
   render() {

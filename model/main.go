@@ -255,42 +255,38 @@ func migrateDB() error {
 		return err
 	}
 
-	err := DB.AutoMigrate(
-		&Channel{},
-		&Token{},
-		&User{},
-		&PasskeyCredential{},
-		&Option{},
-		&Redemption{},
-		&Ability{},
-		&Log{},
-		&Midjourney{},
-		&TopUp{},
-		&QuotaData{},
-		&Task{},
-		&Model{},
-		&Vendor{},
-		&PrefillGroup{},
-		&Setup{},
-		&TwoFA{},
-		&TwoFABackupCode{},
-		&Checkin{},
-		&SubscriptionOrder{},
-		&UserSubscription{},
-		&SubscriptionPreConsumeRecord{},
-		&CustomOAuthProvider{},
-		&UserOAuthBinding{},
-		&PerfMetric{},
-	)
-	if err != nil {
-		return err
+	// Models that are safe for SQLite AutoMigrate (no decimal(N,M) ALTER issues)
+	safeModels := []interface{}{
+		&Channel{}, &Token{}, &User{}, &PasskeyCredential{},
+		&Option{}, &Redemption{}, &Ability{}, &Log{},
+		&Midjourney{}, &TopUp{}, &QuotaData{}, &Task{},
+		&Vendor{}, &PrefillGroup{}, &Setup{},
+		&TwoFA{}, &TwoFABackupCode{}, &Checkin{},
+		&SubscriptionOrder{}, &UserSubscription{}, &SubscriptionPreConsumeRecord{},
+		&CustomOAuthProvider{}, &UserOAuthBinding{}, &PerfMetric{},
+		&ChannelCost{}, &ChannelModelPrice{}, &PriceSyncLog{},
 	}
+	for _, m := range safeModels {
+		if err := DB.AutoMigrate(m); err != nil {
+			return fmt.Errorf("failed to migrate %T: %v", m, err)
+		}
+	}
+
 	if common.UsingSQLite {
+		// glebarez/sqlite AlterColumn regex breaks on decimal(N,M) types:
+		// non-greedy .*? stops at comma inside parentheses, producing invalid DDL.
+		// Use column-add-only handlers instead of AutoMigrate for affected tables.
+		if err := ensureModelsTableSQLite(); err != nil {
+			return err
+		}
+		if err := ensurePriceAlertLogsTableSQLite(); err != nil {
+			return err
+		}
 		if err := ensureSubscriptionPlanTableSQLite(); err != nil {
 			return err
 		}
 	} else {
-		if err := DB.AutoMigrate(&SubscriptionPlan{}); err != nil {
+		if err := DB.AutoMigrate(&Model{}, &PriceAlertLog{}, &SubscriptionPlan{}); err != nil {
 			return err
 		}
 	}
@@ -330,6 +326,20 @@ func migrateDBFast() error {
 		{&CustomOAuthProvider{}, "CustomOAuthProvider"},
 		{&UserOAuthBinding{}, "UserOAuthBinding"},
 		{&PerfMetric{}, "PerfMetric"},
+		{&ChannelCost{}, "ChannelCost"},
+		{&ChannelModelPrice{}, "ChannelModelPrice"},
+		{&PriceSyncLog{}, "PriceSyncLog"},
+	}
+	// Model and PriceAlertLog are excluded for SQLite due to
+	// glebarez/sqlite AlterColumn regex bug on decimal(N,M) types
+	if !common.UsingSQLite {
+		migrations = append(migrations, []struct {
+			model interface{}
+			name  string
+		}{
+			{&Model{}, "Model"},
+			{&PriceAlertLog{}, "PriceAlertLog"},
+		}...)
 	}
 	// 动态计算migration数量，确保errChan缓冲区足够大
 	errChan := make(chan error, len(migrations))
@@ -355,6 +365,12 @@ func migrateDBFast() error {
 		}
 	}
 	if common.UsingSQLite {
+		if err := ensureModelsTableSQLite(); err != nil {
+			return err
+		}
+		if err := ensurePriceAlertLogsTableSQLite(); err != nil {
+			return err
+		}
 		if err := ensureSubscriptionPlanTableSQLite(); err != nil {
 			return err
 		}
@@ -439,6 +455,102 @@ PRIMARY KEY (` + "`id`" + `)
 		{Name: "quota_reset_custom_seconds", DDL: "`quota_reset_custom_seconds` bigint DEFAULT 0"},
 		{Name: "created_at", DDL: "`created_at` bigint"},
 		{Name: "updated_at", DDL: "`updated_at` bigint"},
+	}
+	for _, col := range required {
+		if _, ok := existing[col.Name]; ok {
+			continue
+		}
+		if err := DB.Exec("ALTER TABLE `" + tableName + "` ADD COLUMN " + col.DDL).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ensureModelsTableSQLite handles the models table migration for SQLite.
+// The glebarez/sqlite AlterColumn regex (non-greedy .*? with (,|\)\s*$)) breaks
+// on column types like decimal(15,6) — it stops at the comma inside parentheses,
+// producing invalid DDL.  This handler only adds missing columns via ALTER TABLE
+// ADD COLUMN, never altering existing ones.
+func ensureModelsTableSQLite() error {
+	if !common.UsingSQLite {
+		return nil
+	}
+	tableName := "models"
+	if !DB.Migrator().HasTable(tableName) {
+		return DB.AutoMigrate(&Model{})
+	}
+	var cols []struct {
+		Name string `gorm:"column:name"`
+	}
+	if err := DB.Raw("PRAGMA table_info(`" + tableName + "`)").Scan(&cols).Error; err != nil {
+		return err
+	}
+	existing := make(map[string]struct{}, len(cols))
+	for _, c := range cols {
+		existing[c.Name] = struct{}{}
+	}
+	required := []sqliteColumnDef{
+		{Name: "model_name", DDL: "`model_name` text NOT NULL"},
+		{Name: "description", DDL: "`description` text"},
+		{Name: "icon", DDL: "`icon` varchar(128)"},
+		{Name: "tags", DDL: "`tags` varchar(255)"},
+		{Name: "vendor_id", DDL: "`vendor_id` integer"},
+		{Name: "endpoints", DDL: "`endpoints` text"},
+		{Name: "status", DDL: "`status` integer DEFAULT 1"},
+		{Name: "sync_official", DDL: "`sync_official` integer DEFAULT 1"},
+		{Name: "official_price_input", DDL: "`official_price_input` decimal DEFAULT 0"},
+		{Name: "official_price_output", DDL: "`official_price_output` decimal DEFAULT 0"},
+		{Name: "official_price_cache", DDL: "`official_price_cache` decimal DEFAULT 0"},
+		{Name: "created_time", DDL: "`created_time` integer"},
+		{Name: "updated_time", DDL: "`updated_time` integer"},
+		{Name: "deleted_at", DDL: "`deleted_at` datetime"},
+		{Name: "name_rule", DDL: "`name_rule` integer DEFAULT 0"},
+	}
+	for _, col := range required {
+		if _, ok := existing[col.Name]; ok {
+			continue
+		}
+		if err := DB.Exec("ALTER TABLE `" + tableName + "` ADD COLUMN " + col.DDL).Error; err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ensurePriceAlertLogsTableSQLite handles price_alert_logs migration for SQLite.
+// Same rationale as ensureModelsTableSQLite: avoid the AlterColumn regex bug.
+func ensurePriceAlertLogsTableSQLite() error {
+	if !common.UsingSQLite {
+		return nil
+	}
+	tableName := "price_alert_logs"
+	if !DB.Migrator().HasTable(tableName) {
+		return DB.AutoMigrate(&PriceAlertLog{})
+	}
+	var cols []struct {
+		Name string `gorm:"column:name"`
+	}
+	if err := DB.Raw("PRAGMA table_info(`" + tableName + "`)").Scan(&cols).Error; err != nil {
+		return err
+	}
+	existing := make(map[string]struct{}, len(cols))
+	for _, c := range cols {
+		existing[c.Name] = struct{}{}
+	}
+	required := []sqliteColumnDef{
+		{Name: "alert_type", DDL: "`alert_type` text"},
+		{Name: "channel_id", DDL: "`channel_id` integer"},
+		{Name: "channel_name", DDL: "`channel_name` text"},
+		{Name: "model_name", DDL: "`model_name` text"},
+		{Name: "cost_price", DDL: "`cost_price` decimal"},
+		{Name: "platform_price", DDL: "`platform_price` decimal"},
+		{Name: "profit_margin", DDL: "`profit_margin` decimal"},
+		{Name: "message", DDL: "`message` text"},
+		{Name: "status", DDL: "`status` integer DEFAULT 0"},
+		{Name: "created_time", DDL: "`created_time` integer"},
+		{Name: "acknowledged_by", DDL: "`acknowledged_by` integer DEFAULT 0"},
+		{Name: "acknowledged_at", DDL: "`acknowledged_at` integer DEFAULT 0"},
 	}
 	for _, col := range required {
 		if _, ok := existing[col.Name]; ok {

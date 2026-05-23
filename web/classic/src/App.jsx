@@ -32,6 +32,9 @@ import { StatusContext } from './context/Status';
 import PasswordResetForm from './components/auth/PasswordResetForm';
 import PasswordResetConfirm from './components/auth/PasswordResetConfirm';
 import Channel from './pages/Channel';
+import ChannelCost from './pages/ChannelCost';
+import MultiChannelPricing from './pages/MultiChannelPricing';
+import PricingAlert from './pages/PricingAlert';
 import Token from './pages/Token';
 import Redemption from './pages/Redemption';
 import TopUp from './pages/TopUp';
@@ -136,6 +139,30 @@ function App() {
           element={
             <AdminRoute>
               <Channel />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path='/console/channel-cost'
+          element={
+            <AdminRoute>
+              <ChannelCost />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path='/console/multi-channel-pricing'
+          element={
+            <AdminRoute>
+              <MultiChannelPricing />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path='/console/pricing-alert'
+          element={
+            <AdminRoute>
+              <PricingAlert />
             </AdminRoute>
           }
         />

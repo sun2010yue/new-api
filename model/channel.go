@@ -54,6 +54,10 @@ type Channel struct {
 
 	OtherSettings string `json:"settings" gorm:"column:settings"` // 其他设置，存储azure版本等不需要检索的信息，详见dto.ChannelOtherSettings
 
+	// sync tracking
+	LastSyncTime int64 `json:"last_sync_time" gorm:"bigint;default:0"`
+	SyncStatus   int   `json:"sync_status" gorm:"default:0"` // 0=unsynced 1=synced 2=sync_failed
+
 	// cache info
 	Keys []string `json:"-" gorm:"-"`
 }

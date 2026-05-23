@@ -257,6 +257,44 @@ func SetApiRouter(router *gin.Engine) {
 			channelRoute.POST("/upstream_updates/detect", controller.DetectChannelUpstreamModelUpdates)
 			channelRoute.POST("/upstream_updates/detect_all", controller.DetectAllChannelUpstreamModelUpdates)
 		}
+
+		channelCostRoute := apiRouter.Group("/channel-cost")
+		channelCostRoute.Use(middleware.AdminAuth())
+		{
+			channelCostRoute.GET("/", controller.GetAllChannelCosts)
+			channelCostRoute.GET("/:id", controller.GetChannelCost)
+			channelCostRoute.GET("/by-channel", controller.GetChannelCostByChannel)
+			channelCostRoute.POST("/", controller.CreateChannelCost)
+			channelCostRoute.PUT("/:id", controller.UpdateChannelCost)
+			channelCostRoute.DELETE("/:id", controller.DeleteChannelCost)
+		}
+
+		channelPricingRoute := apiRouter.Group("/channel-pricing")
+		channelPricingRoute.Use(middleware.AdminAuth())
+		{
+			channelPricingRoute.GET("/", controller.GetChannelModelPrices)
+			channelPricingRoute.GET("/:id", controller.GetChannelModelPrice)
+			channelPricingRoute.POST("/", controller.CreateChannelModelPrice)
+			channelPricingRoute.PUT("/:id", controller.UpdateChannelModelPrice)
+			channelPricingRoute.DELETE("/:id", controller.DeleteChannelModelPrice)
+			channelPricingRoute.POST("/sync", controller.SyncChannelPrices)
+			channelPricingRoute.POST("/batch", controller.BatchUpdateChannelPricing)
+			channelPricingRoute.GET("/anomalies", controller.CheckPriceAnomalies)
+			channelPricingRoute.GET("/stats", controller.GetPricingStats)
+			channelPricingRoute.GET("/logs", controller.GetPriceSyncLogs)
+			channelPricingRoute.GET("/official-prices", controller.GetOfficialPrices)
+			channelPricingRoute.POST("/sync-official-prices", controller.SyncOfficialModelPrices)
+		}
+
+		pricingAlertRoute := apiRouter.Group("/pricing-alerts")
+		pricingAlertRoute.Use(middleware.AdminAuth())
+		{
+			pricingAlertRoute.GET("/", controller.GetPriceAlertLogs)
+			pricingAlertRoute.GET("/unread-count", controller.GetUnreadPriceAlertCount)
+			pricingAlertRoute.POST("/:id/acknowledge", controller.AcknowledgePriceAlert)
+			pricingAlertRoute.POST("/acknowledge-all", controller.AcknowledgeAllPriceAlerts)
+		}
+
 		tokenRoute := apiRouter.Group("/token")
 		tokenRoute.Use(middleware.UserAuth())
 		{

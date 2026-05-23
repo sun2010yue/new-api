@@ -33,6 +33,8 @@ import { Nav, Divider, Button } from '@douyinfe/semi-ui';
 const routerMap = {
   home: '/',
   channel: '/console/channel',
+  channelCost: '/console/channel-cost',
+  multiChannelPricing: '/console/multi-channel-pricing',
   token: '/console/token',
   redemption: '/console/redemption',
   topup: '/console/topup',
@@ -49,6 +51,7 @@ const routerMap = {
   deployment: '/console/deployment',
   playground: '/console/playground',
   personal: '/console/personal',
+  pricingAlert: '/console/pricing-alert',
 };
 
 const SiderBar = ({ onNavigate = () => {} }) => {
@@ -151,6 +154,24 @@ const SiderBar = ({ onNavigate = () => {} }) => {
         text: t('渠道管理'),
         itemKey: 'channel',
         to: '/channel',
+        className: isAdmin() ? '' : 'tableHiddle',
+      },
+      {
+        text: t('渠道成本'),
+        itemKey: 'channelCost',
+        to: '/channel-cost',
+        className: isAdmin() ? '' : 'tableHiddle',
+      },
+      {
+        text: t('多渠道定价'),
+        itemKey: 'multiChannelPricing',
+        to: '/multi-channel-pricing',
+        className: isAdmin() ? '' : 'tableHiddle',
+      },
+      {
+        text: t('价格告警'),
+        itemKey: 'pricingAlert',
+        to: '/pricing-alert',
         className: isAdmin() ? '' : 'tableHiddle',
       },
       {
